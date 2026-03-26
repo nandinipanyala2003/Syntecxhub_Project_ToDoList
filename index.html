@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToDo App</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: rgba(0,0,0,0.4);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+input, select {
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #00ffd5;
+}
+
+.task {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.done {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📋 ToDo List</h1>
+
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <select id="priority">
+        <option value="H">High</option>
+        <option value="M" selected>Medium</option>
+        <option value="L">Low</option>
+    </select>
+
+    <br>
+    <button onclick="addTask()">➕ Add</button>
+
+    <h3>📋 Tasks</h3>
+    <div id="taskList"></div>
+
+    <h3>📊 Stats</h3>
+    <p id="stats"></p>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function addTask() {
+    let input = document.getElementById("taskInput");
+    let priority = document.getElementById("priority").value;
+
+    if (!input.value) return;
+
+    tasks.push({
+        task: input.value,
+        priority: priority,
+        done: false
+    });
+
+    input.value = "";
+    saveTasks();
+    showTasks();
+}
+
+function showTasks() {
+    let list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    tasks.forEach((t, i) => {
+        let div = document.createElement("div");
+        div.className = "task";
+
+        div.innerHTML = `
+            <span class="${t.done ? 'done' : ''}">
+                [${t.priority}] ${t.task}
+            </span>
+            <div>
+                <button onclick="markDone(${i})">✅</button>
+                <button onclick="deleteTask(${i})">🗑️</button>
+            </div>
+        `;
+
+        list.appendChild(div);
+    });
+
+    updateStats();
+}
+
+function markDone(i) {
+    tasks[i].done = !tasks[i].done;
+    saveTasks();
+    showTasks();
+}
+
+function deleteTask(i) {
+    tasks.splice(i, 1);
+    saveTasks();
+    showTasks();
+}
+
+function updateStats() {
+    let done = tasks.filter(t => t.done).length;
+    document.getElementById("stats").innerText =
+        `${tasks.length} total | ${done} done | ${tasks.length - done} pending`;
+}
+
+showTasks();
+</script>
+
+</body>
+</html>
